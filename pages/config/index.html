@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统配置</title>
+  <link rel="stylesheet" href="../../styles/global.css">
+  <style>
+    /* 装饰背景 */
+    .config-page::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 15% 25%, rgba(255, 182, 193, 0.3) 0%, transparent 20%),
+        radial-gradient(circle at 85% 75%, rgba(255, 192, 203, 0.3) 0%, transparent 20%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 220, 0.2) 0%, transparent 30%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .config-page {
+      padding: 20px 40px;
+      height: calc(100vh - 36px);
+      overflow-y: auto;
+      background: linear-gradient(135deg, #fff5f7 0%, #ffe4ec 50%, #ffd6e0 100%);
+      position: relative;
+    }
+    
+    .config-page > * {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .page-title {
+      font-size: 26px;
+      margin-bottom: 0;
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+    
+    .back-btn {
+      padding: 10px 22px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .back-btn:hover {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: rgba(255, 107, 157, 0.1);
+    }
+    
+    .config-section {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.1);
+    }
+    
+    .section-title {
+      font-size: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(255, 182, 193, 0.3);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    /* 开关样式 */
+    .toggle-switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 182, 193, 0.4);
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+    
+    .toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(24px);
+    }
+    
+    /* 输入框 */
+    .config-input {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid rgba(255, 182, 193, 0.3);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+    
+    .config-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.15);
+    }
+    
+    .config-input::placeholder {
+      color: var(--text-light);
+    }
+    
+    /* 按钮组 */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .config-btn {
+      padding: 12px 28px;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .config-btn.primary {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+    }
+    
+    .config-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(255, 107, 157, 0.4);
+    }
+    
+    .config-btn.test {
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      color: var(--text-secondary);
+    }
+    
+    .config-btn.test:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: rgba(255, 107, 157, 0.1);
+    }
+    
+    .config-btn.test:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* API 配置区域 */
+    .api-config-area {
+      background: rgba(255, 240, 245, 0.6);
+      border-radius: 15px;
+      padding: 20px;
+    }
+    
+    .api-input-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .api-input-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .api-input-row label {
+      min-width: 100px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .api-input-row .config-input {
+      flex: 1;
+    }
+    
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 15px;
+      padding: 12px 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: none;
+    }
+    
+    .api-status.show {
+      display: flex;
+    }
+    
+    .api-status.success {
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.4);
+      color: #3cb371;
+    }
+    
+    .api-status.error {
+      background: rgba(255, 107, 157, 0.15);
+      border: 1px solid rgba(255, 107, 157, 0.4);
+      color: var(--accent-primary);
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+    }
+    
+    .status-dot.success {
+      background: linear-gradient(135deg, #7dd87d, #4ade80);
+    }
+    
+    .status-dot.error {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+    }
+    
+    .status-dot.testing {
+      background: #fbbf24;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* 深度思考设置 */
+    .deep-thinking-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255, 182, 193, 0.2);
+    }
+    
+    .deep-thinking-row:last-child {
+      border-bottom: none;
+    }
+    
+    .config-label {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .config-name {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    
+    .config-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    /* 保存成功提示 */
+    .save-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, #7dd87d, #4ade80);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
+    }
+    
+    .save-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    .toast-error {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+    }
+    
+    /* 确认对话框 */
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 9998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .confirm-overlay.show {
+      display: flex;
+    }
+    
+    .confirm-dialog {
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+      max-width: 320px;
+      text-align: center;
+    }
+    
+    .confirm-dialog p {
+      margin: 0 0 20px;
+      color: var(--text-primary);
+      font-size: 15px;
+    }
+    
+    .confirm-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    
+    .confirm-btn {
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .confirm-btn.yes {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      border: none;
+      color: white;
+    }
+    
+    .confirm-btn.no {
+      background: rgba(255, 240, 245, 0.9);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- 确认对话框 -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <p id="confirmMessage">确定要执行此操作吗？</p>
+      <div class="confirm-buttons">
+        <button class="confirm-btn no" onclick="closeConfirm(false)">取消</button>
+        <button class="confirm-btn yes" onclick="closeConfirm(true)">确定</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 标题栏 -->
+  <div class="title-bar">
+    <span class="title-bar-title">自定义 - 系统配置</span>
+    <div class="title-bar-controls">
+      <button class="title-bar-btn" onclick="electronAPI.minimizeWindow()">─</button>
+      <button class="title-bar-btn" onclick="electronAPI.maximizeWindow()">□</button>
+      <button class="title-bar-btn close" onclick="electronAPI.closeWindow()">✕</button>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="config-page">
+    <div class="page-header">
+      <h1 class="page-title">系统配置</h1>
+      <button class="back-btn" onclick="goBack()">← 返回主页</button>
+    </div>
+    
+    <!-- API 配置 -->
+    <div class="config-section">
+      <h2 class="section-title">API 配置</h2>
+      
+      <div class="api-config-area">
+        <div class="api-input-row">
+          <label>API 地址</label>
+          <input type="text" class="config-input" id="api-base-url" placeholder="输入 API 地址..." onchange="markChanged()">
+        </div>
+        
+        <div class="api-input-row">
+          <label>API Key</label>
+          <input type="password" class="config-input" id="api-key" placeholder="输入 API Key..." onchange="markChanged()">
+        </div>
+        
+        <div class="api-input-row">
+          <label>模型名称</label>
+          <input type="text" class="config-input" id="api-model" placeholder="输入模型名称..." onchange="markChanged()">
+        </div>
+        
+        <div class="api-status" id="api-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">未测试</span>
+        </div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="config-btn test" id="test-btn" onclick="testApi()">测试连接</button>
+      </div>
+    </div>
+    
+    <!-- 深度思考设置 -->
+    <div class="config-section">
+      <h2 class="section-title">深度思考</h2>
+      
+      <div class="deep-thinking-row">
+        <div class="config-label">
+          <span class="config-name">启用深度思考</span>
+          <span class="config-desc">AI 会在回复前进行深度分析，提升回复质量</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="deepThinking" checked onchange="markChanged()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <!-- TTS 语音设置 -->
+    <div class="config-section">
+      <h2 class="section-title">语音设置</h2>
+      
+      <div class="deep-thinking-row">
+        <div class="config-label">
+          <span class="config-name">启用 TTS</span>
+          <span class="config-desc">AI 回复时自动朗读语音（使用浏览器内置语音）</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="ttsEnabled" checked onchange="markChanged()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <!-- 保存按钮 -->
+    <div class="btn-group" style="justify-content: center; margin-top: 30px;">
+      <button class="config-btn primary" onclick="saveSettings()">保存设置</button>
+    </div>
+  </div>
+
+  <!-- 保存成功提示 -->
+  <div class="save-toast" id="save-toast">设置已保存</div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>角色设定</title>
+  <link rel="stylesheet" href="../../styles/global.css">
+  <style>
+    /* 装饰背景 */
+    .character-page::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.3) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 192, 203, 0.3) 0%, transparent 20%),
+        radial-gradient(circle at 50% 50%, rgba(255, 209, 220, 0.2) 0%, transparent 30%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .character-page {
+      padding: 20px 40px;
+      height: calc(100vh - 36px);
+      overflow-y: auto;
+      background: linear-gradient(135deg, #fff5f7 0%, #ffe4ec 50%, #ffd6e0 100%);
+      position: relative;
+    }
+    
+    .character-page > * {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .page-title {
+      font-size: 26px;
+      margin-bottom: 0;
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+    
+    .back-btn {
+      padding: 10px 22px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .back-btn:hover {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: rgba(255, 107, 157, 0.1);
+    }
+    
+    /* 主布局 */
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    /* 编辑区 */
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    
+    .editor-section {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.1);
+    }
+    
+    .editor-section-title {
+      font-size: 15px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(255, 182, 193, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .form-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .form-input {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid rgba(255, 182, 193, 0.3);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+    
+    .form-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.15);
+    }
+    
+    .form-input::placeholder {
+      color: var(--text-light);
+    }
+    
+    .form-textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    
+    .form-textarea.large {
+      min-height: 130px;
+    }
+    
+    /* 阶段编辑 */
+    .stage-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    
+    .stage-tab {
+      padding: 8px 18px;
+      background: rgba(255, 240, 245, 0.8);
+      border: 2px solid rgba(255, 182, 193, 0.3);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .stage-tab:hover {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: rgba(255, 107, 157, 0.1);
+    }
+    
+    .stage-tab.active {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 3px 12px rgba(255, 107, 157, 0.3);
+    }
+    
+    .stage-content {
+      display: none;
+    }
+    
+    .stage-content.active {
+      display: block;
+    }
+    
+    /* 底部操作栏 */
+    .action-bar {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      padding-top: 15px;
+      border-top: 2px solid rgba(255, 182, 193, 0.3);
+      margin-top: 20px;
+    }
+    
+    .action-btn {
+      padding: 12px 35px;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .action-btn.primary {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+    }
+    
+    .action-btn.primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(255, 107, 157, 0.4);
+    }
+    
+    .action-btn.secondary {
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      color: var(--text-secondary);
+    }
+    
+    .action-btn.secondary:hover {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: rgba(255, 107, 157, 0.1);
+    }
+    
+    /* 提示信息 */
+    .info-banner {
+      background: linear-gradient(135deg, rgba(255, 158, 181, 0.15), rgba(255, 196, 212, 0.15));
+      border: 1px solid rgba(255, 182, 193, 0.4);
+      border-radius: 15px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+    }
+    
+    .info-banner strong {
+      color: var(--accent-primary);
+    }
+    
+    /* Toast 通知 */
+    .toast-container {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    
+    .toast {
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      border-radius: 12px;
+      padding: 12px 24px;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.2);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      animation: toastIn 0.3s ease;
+      pointer-events: auto;
+    }
+    
+    .toast.success {
+      border-color: #91d5ff;
+      background: linear-gradient(135deg, rgba(145, 213, 255, 0.1), rgba(255, 255, 255, 0.98));
+    }
+    
+    .toast.error {
+      border-color: #ffa39e;
+      background: linear-gradient(135deg, rgba(255, 163, 158, 0.1), rgba(255, 255, 255, 0.98));
+    }
+    
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* 确认对话框 */
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 9998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .confirm-overlay.show {
+      display: flex;
+    }
+    
+    .confirm-dialog {
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+      max-width: 320px;
+      text-align: center;
+    }
+    
+    .confirm-dialog p {
+      margin: 0 0 20px;
+      color: var(--text-primary);
+      font-size: 15px;
+    }
+    
+    .confirm-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    
+    .confirm-btn {
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .confirm-btn.yes {
+      background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+      border: none;
+      color: white;
+    }
+    
+    .confirm-btn.no {
+      background: rgba(255, 240, 245, 0.9);
+      border: 2px solid rgba(255, 182, 193, 0.4);
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast 通知容器 -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- 确认对话框 -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <p id="confirmMessage">确定要重置所有设定吗？</p>
+      <div class="confirm-buttons">
+        <button class="confirm-btn no" onclick="closeConfirm(false)">取消</button>
+        <button class="confirm-btn yes" onclick="closeConfirm(true)">确定</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 标题栏 -->
+  <div class="title-bar">
+    <span class="title-bar-title">自定义 - 角色设定</span>
+    <div class="title-bar-controls">
+      <button class="title-bar-btn" onclick="electronAPI.minimizeWindow()">─</button>
+      <button class="title-bar-btn" onclick="electronAPI.maximizeWindow()">□</button>
+      <button class="title-bar-btn close" onclick="electronAPI.closeWindow()">✕</button>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="character-page">
+    <div class="page-header">
+      <h1 class="page-title">角色设定</h1>
+      <button class="back-btn" onclick="goBack()">← 返回主页</button>
+    </div>
+    
+    <div class="main-layout">
+      <!-- 提示信息 -->
+      <div class="info-banner">
+        <strong>提示：</strong>编辑完成后点击「保存设定」将生成角色存档，进入游戏后将自动加载。
+      </div>
+      
+      <!-- 玩家信息（最前面） -->
+      <div class="editor-section">
+        <h3 class="editor-section-title">玩家信息</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">玩家姓名</label>
+            <input type="text" class="form-input" id="playerName" placeholder="你的名字">
+          </div>
+          <div class="form-group">
+            <label class="form-label">性别</label>
+            <select class="form-input" id="playerGender">
+              <option value="男">男</option>
+              <option value="女">女</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">身份</label>
+            <input type="text" class="form-input" id="playerIdentity" placeholder="如：冒险家">
+          </div>
+        </div>
+      </div>
+      
+      <!-- 角色基础信息 -->
+      <div class="editor-section">
+        <h3 class="editor-section-title">角色基础信息</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">角色名称</label>
+            <input type="text" class="form-input" id="roleName" placeholder="角色名称">
+          </div>
+          <div class="form-group">
+            <label class="form-label">性别</label>
+            <select class="form-input" id="roleGender">
+              <option value="女">女</option>
+              <option value="男">男</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">年龄</label>
+            <input type="number" class="form-input" id="roleAge" placeholder="16" min="1" max="999">
+          </div>
+        </div>
+      </div>
+      
+      <!-- 世界观设定 -->
+      <div class="editor-section">
+        <h3 class="editor-section-title">世界观设定</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">世界名称</label>
+            <input type="text" class="form-input" id="worldName" placeholder="世界的名称">
+          </div>
+          <div class="form-group">
+            <label class="form-label">纪元</label>
+            <input type="text" class="form-input" id="worldEra" placeholder="如：末日纪元、复兴纪元">
+          </div>
+          <div class="form-group">
+            <label class="form-label">当前日期</label>
+            <input type="text" class="form-input" id="worldDate" placeholder="如：13年9月2日、13.9.2、13.09.02">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label class="form-label">时间格式（可选）</label>
+            <input type="text" class="form-input" id="timeFormat" placeholder="留空则使用默认格式。可用变量: {era}, {date}, {hour}" style="font-size: 13px;">
+            <div style="font-size: 12px; color: var(--text-light); margin-top: 4px;">
+              示例1：留空 → 末日纪元13年9月2日 12时（默认格式）<br>
+              示例2：{era}·{date}·{hour}时 → 末日纪元·13年9月2日·12时
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label class="form-label">世界背景</label>
+            <textarea class="form-input form-textarea" id="worldBackground" placeholder="描述这个世界的故事背景..."></textarea>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 阶段人设 -->
+      <div class="editor-section">
+        <h3 class="editor-section-title">阶段人设</h3>
+        <div class="stage-tabs">
+          <button class="stage-tab active" onclick="switchStage('dislike')">厌恶</button>
+          <button class="stage-tab" onclick="switchStage('acquaintance')">初识</button>
+          <button class="stage-tab" onclick="switchStage('familiar')">熟悉</button>
+          <button class="stage-tab" onclick="switchStage('intimate')">亲密</button>
+          <button class="stage-tab" onclick="switchStage('yandere')">病娇</button>
+        </div>
+        
+        <div class="stage-content active" id="stage-dislike">
+          <div class="form-group full-width">
+            <label class="form-label">阶段描述</label>
+            <textarea class="form-input form-textarea" id="stage-dislike-description" placeholder="该阶段的描述..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">性格</label>
+            <textarea class="form-input form-textarea" id="stage-dislike-personality" placeholder="该阶段的性格..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">场景</label>
+            <textarea class="form-input form-textarea large" id="stage-dislike-scenario" placeholder="该阶段的场景..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">标签（逗号分隔）</label>
+            <input type="text" class="form-input" id="stage-dislike-tags" placeholder="冷漠, 敌意, 拒绝">
+          </div>
+        </div>
+        
+        <div class="stage-content" id="stage-acquaintance">
+          <div class="form-group full-width">
+            <label class="form-label">阶段描述</label>
+            <textarea class="form-input form-textarea" id="stage-acquaintance-description"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">性格</label>
+            <textarea class="form-input form-textarea" id="stage-acquaintance-personality"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">场景</label>
+            <textarea class="form-input form-textarea large" id="stage-acquaintance-scenario"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">标签（逗号分隔）</label>
+            <input type="text" class="form-input" id="stage-acquaintance-tags">
+          </div>
+        </div>
+        
+        <div class="stage-content" id="stage-familiar">
+          <div class="form-group full-width">
+            <label class="form-label">阶段描述</label>
+            <textarea class="form-input form-textarea" id="stage-familiar-description"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">性格</label>
+            <textarea class="form-input form-textarea" id="stage-familiar-personality"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">场景</label>
+            <textarea class="form-input form-textarea large" id="stage-familiar-scenario"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">标签（逗号分隔）</label>
+            <input type="text" class="form-input" id="stage-familiar-tags">
+          </div>
+        </div>
+        
+        <div class="stage-content" id="stage-intimate">
+          <div class="form-group full-width">
+            <label class="form-label">阶段描述</label>
+            <textarea class="form-input form-textarea" id="stage-intimate-description"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">性格</label>
+            <textarea class="form-input form-textarea" id="stage-intimate-personality"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">场景</label>
+            <textarea class="form-input form-textarea large" id="stage-intimate-scenario"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">标签（逗号分隔）</label>
+            <input type="text" class="form-input" id="stage-intimate-tags">
+          </div>
+        </div>
+        
+        <div class="stage-content" id="stage-yandere">
+          <div class="form-group full-width">
+            <label class="form-label">阶段描述</label>
+            <textarea class="form-input form-textarea" id="stage-yandere-description"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">性格</label>
+            <textarea class="form-input form-textarea" id="stage-yandere-personality"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">场景</label>
+            <textarea class="form-input form-textarea large" id="stage-yandere-scenario"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">标签（逗号分隔）</label>
+            <input type="text" class="form-input" id="stage-yandere-tags">
+          </div>
+        </div>
+      </div>
+      
+      <!-- 操作栏 -->
+      <div class="action-bar">
+        <button class="action-btn secondary" onclick="resetForm()">重置</button>
+        <button class="action-btn primary" onclick="saveSettings()">保存设定</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
